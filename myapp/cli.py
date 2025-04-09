@@ -2,7 +2,12 @@
 
 import argparse
 import logging
+import os 
+from dotenv import load_dotenv
 from myapp import author_api, db
+
+# Load environment variables from a .env file in the project root
+load_dotenv()
 
 logging.basicConfig(
     level=logging.INFO, 
@@ -28,7 +33,8 @@ def main():
     logger.info(f"Found author key: {author_key}")
     logger.debug("Author JSON profile: %s", author_data)
 
-    # Connect to the database and create tables if necessary
+    # Get the database file from an environment variable (default: "authors.db")
+    db_file = os.environ.get("DATABASE_FILE", "authors.db")
     conn = db.create_connection()
     if conn is None:
         logger.error("Failed to connect to the database.")
