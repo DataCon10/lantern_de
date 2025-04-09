@@ -1,6 +1,9 @@
 # myapp/db.py
 
 import sqlite3
+import logging
+
+logger = logging.getLogger(__name__)
 
 DATABASE_FILE = "authors.db"
 
@@ -8,10 +11,10 @@ def create_connection(db_file=DATABASE_FILE):
     """Create and return a connection to the SQLite database."""
     try:
         conn = sqlite3.connect(db_file)
-        print(f"Connected to database: {db_file}")
+        logger.info("Connected to database: %s", db_file)
         return conn
     except sqlite3.Error as e:
-        print(f"Error: {e}")
+        logger.error("Error connecting to database: %s", e)
         return None
 
 def create_tables(conn):
@@ -40,11 +43,15 @@ def create_tables(conn):
     );
     """
     
-    cur = conn.cursor()
-    cur.execute(create_authors_table)
-    cur.execute(create_ratings_table)
-    conn.commit()
-    print("Tables created successfully.")
+    try:
+        cur = conn.cursor()
+        cur.execute(create_authors_table)
+        cur.execute(create_ratings_table)
+        conn.commit()
+        logger.info("Tables created successfully.")
+    except sqlite3.Error as e:
+        logger.error("Error creating tables: %s", e)
+        conn.rollback()
 
 def insert_author(conn, author):
     """Insert or update the core author profile into the authors table."""
@@ -59,9 +66,14 @@ def insert_author(conn, author):
         author.get("top_work"),
         author.get("work_count"),
     )
-    cur = conn.cursor()
-    cur.execute(sql, values)
-    conn.commit()
+    try:
+        cur = conn.cursor()
+        cur.execute(sql, values)
+        conn.commit()
+        logger.info("Inserted/Updated author %s", author.get("key"))
+    except sqlite3.Error as e:
+        logger.error("Error inserting/updating author: %s", e)
+        conn.rollback()
 
 def insert_ratings(conn, author):
     """Insert or update the ratings data in the ratings table."""
@@ -87,6 +99,11 @@ def insert_ratings(conn, author):
         author.get("ratings_count_4", 0),
         author.get("ratings_count_5", 0),
     )
-    cur = conn.cursor()
-    cur.execute(sql, values)
-    conn.commit()
+    try:
+        cur = conn.cursor()
+        cur.execute(sql, values)
+        conn.commit()
+        logger.info("Inserted/Updated ratings for author %s", author.get("key"))
+    except sqlite3.Error as e:
+        logger.error("Error inserting/updating ratings: %s", e)
+        conn.rollback()

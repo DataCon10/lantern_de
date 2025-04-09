@@ -2,6 +2,9 @@
 
 import requests
 import sys
+import logging
+
+logger = logging.getLogger(__name__)
 
 def search_author(author_name):
     """
@@ -15,12 +18,12 @@ def search_author(author_name):
         response = requests.get(url, timeout=10, verify=False)
         response.raise_for_status()
     except requests.RequestException as e:
-        print(f"Error during the API call: {e}")
+        logger.error("Error during the API call: %s", e)
         sys.exit(1)
 
     data = response.json()
     if data.get("numFound", 0) == 0 or not data.get("docs"):
-        print("No author found for the given name.")
+        logger.error("No author found for the given name: %s", author_name)
         sys.exit(1)
 
     # Take the first result and clean up the key
