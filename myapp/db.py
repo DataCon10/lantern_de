@@ -2,10 +2,12 @@
 
 import sqlite3
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
-DATABASE_FILE = "authors.db"
+# Load the database filename from environment variables, default to "authors.db"
+DATABASE_FILE = os.environ.get("DATABASE_FILE", "authors.db")
 
 def create_connection(db_file=DATABASE_FILE):
     """Create and return a connection to the SQLite database."""
