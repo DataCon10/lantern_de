@@ -1,7 +1,7 @@
 # myapp/cli.py
 
 import argparse
-from myapp import author_api
+from myapp import author_api, db
 
 def parse_args():
     """
@@ -21,6 +21,20 @@ def main():
     print(f"Found author key: {author_key}")
     print("\nAuthor JSON profile:")
     print(author_data)
+
+    # Connect to the database and create tables if necessary
+    conn = db.create_connection()
+    if conn is None:
+        print("Failed to connect to the database.")
+        return
+    db.create_tables(conn)
+
+    # Insert the author data into the tables
+    db.insert_author(conn, author_data)
+    db.insert_ratings(conn, author_data)
+    conn.close()
+    
+    print("Author data successfully stored in the database.")
 
 if __name__ == '__main__':
     main()
