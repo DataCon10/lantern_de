@@ -1,8 +1,6 @@
-# myapp/cli.py
-
 import argparse
 import logging
-import os 
+import os
 from dotenv import load_dotenv
 from myapp import author_api, db
 
@@ -10,7 +8,7 @@ from myapp import author_api, db
 load_dotenv()
 
 logging.basicConfig(
-    level=logging.INFO, 
+    level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
 )
 logger = logging.getLogger(__name__)
@@ -27,25 +25,30 @@ def parse_args():
 
 def main():
     args = parse_args()
-    logger.info(f"Searching for author: {args.author}")
+    logger.info("Searching for author: %s", args.author)
 
+    # Retrieve the author profile from the API
     author_key, author_data = author_api.search_author(args.author)
-    logger.info(f"Found author key: {author_key}")
+    logger.info("Found author key: %s", author_key)
     logger.debug("Author JSON profile: %s", author_data)
 
-    # Get the database file from an environment variable (default: "authors.db")
-    db_file = os.environ.get("DATABASE_FILE", "authors.db")
-    conn = db.create_connection()
+    # Create an instance of the Database class.
+    # It will use the DATABASE_FILE from the environment (default "authors.db").
+    database = db.Database()
+
+    conn = database.connect()
     if conn is None:
         logger.error("Failed to connect to the database.")
         return
-    db.create_tables(conn)
 
-    # Insert the author data into the tables
-    db.insert_author(conn, author_data)
-    db.insert_ratings(conn, author_data)
-    conn.close()
-    
+    database.create_tables()
+
+    # Insert author profile and ratings data
+    database.insert_author(author_data)
+    database.insert_ratings(author_data)
+
+    database.close()
+
     logger.info("Author data successfully stored in the database.")
 
 if __name__ == '__main__':
