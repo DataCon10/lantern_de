@@ -3,6 +3,7 @@
 import argparse
 import logging
 import os
+from pprint import pprint
 from dotenv import load_dotenv
 from myapp import author_api, db
 
