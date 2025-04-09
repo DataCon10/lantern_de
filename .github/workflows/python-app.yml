@@ -14,14 +14,10 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    # Set up SSH so we can use SSH URLs for cloning
-    - name: Set up SSH
-      run: |
-        mkdir -p ~/.ssh
-        ssh-keyscan github.com >> ~/.ssh/known_hosts
-        echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+    - name: Set up SSH agent
+      uses: webfactory/ssh-agent@v0
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
     - name: Set up Python
       uses: actions/setup-python@v4
