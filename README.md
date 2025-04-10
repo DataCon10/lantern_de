@@ -83,14 +83,21 @@
    pip install -e .
 
 3. **Fetch and store data**
-```python -m myapp.cli run "J.K. Rowling"```
+
+    ```bash
+    python -m myapp.cli run "J.K. Rowling"
+    ```
 
 4. **Launch interactive dashboard**
-```python -m myapp.cli dashboard --author-key OL23919A```
+    ```bash
+    python -m myapp.cli dashboard --author-key OL23919A
+    ```
+
     Open your browser and go to http://127.0.0.1:8050 to view the dashboard, which displays the author's profile and a ratings count chart.
 
 
-# Docker Setup (Not tested locally)
-docker build -t myapp:latest .
-docker run --rm myapp:latest run "J.K. Rowling"
-
+## Docker Setup (Not tested locally)
+    ```
+    docker build -t myapp:latest .
+    docker run --rm myapp:latest run "J.K. Rowling"
+    ```
