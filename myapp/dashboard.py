@@ -7,6 +7,8 @@ import logging
 from typing import Dict, Any
 import plotly.express as px
 
+from myapp import queries  # Import the SQL query strings from the queries module
+
 logger = logging.getLogger(__name__)
 
 def fetch_author_info(author_key: str, db_file: str) -> Dict[str, Any]:
@@ -24,14 +26,14 @@ def fetch_author_info(author_key: str, db_file: str) -> Dict[str, Any]:
     try:
         with sqlite3.connect(db_file) as conn:
             cur = conn.cursor()
-            cur.execute("SELECT name, top_work FROM authors WHERE author_id = ?", (author_key,))
+            cur.execute(queries.SELECT_AUTHOR_INFO, (author_key,))
             author_row = cur.fetchone()
-            cur.execute("SELECT ratings_average FROM ratings WHERE author_id = ?", (author_key,))
+            cur.execute(queries.SELECT_AUTHOR_RATING, (author_key,))
             ratings_row = cur.fetchone()
     except sqlite3.Error as e:
         logger.error("Database error in fetch_author_info: %s", e)
         return {"author_name": "Error", "avg_rating": "Error", "top_work": "Error"}
-
+    
     author_name, top_work = (author_row if author_row else ("Unknown Author", "No top book"))
     avg_rating = ratings_row[0] if ratings_row and ratings_row[0] is not None else None
     logger.info("Fetched info: author_name=%s, top_work=%s, avg_rating=%s", author_name, top_work, avg_rating)
@@ -46,19 +48,12 @@ def fetch_ratings_counts(author_key: str, db_file: str) -> Dict[str, int]:
         db_file (str): Path to the SQLite database file.
 
     Returns:
-        Dict[str, int]: Keys "1-star", "2-star", "3-star", "4-star", "5-star".
-                        Returns zeros if no record is found.
+        Dict[str, int]: Dictionary with keys "1-star", ..., "5-star". Defaults to zeros if no record is found.
     """
     try:
         with sqlite3.connect(db_file) as conn:
             cur = conn.cursor()
-            query = """
-                SELECT ratings_count_1, ratings_count_2, ratings_count_3, 
-                       ratings_count_4, ratings_count_5
-                FROM ratings
-                WHERE author_id = ?
-            """
-            cur.execute(query, (author_key,))
+            cur.execute(queries.SELECT_RATING_COUNTS, (author_key,))
             row = cur.fetchone()
     except sqlite3.Error as e:
         logger.error("Database error in fetch_ratings_counts for author %s: %s", author_key, e)
@@ -74,11 +69,11 @@ def fetch_ratings_counts(author_key: str, db_file: str) -> Dict[str, int]:
 
 def create_summary_layout(info: Dict[str, Any]) -> html.Div:
     """
-    Build the summary layout displaying the author's name, top work, and average rating.
-    
+    Build the summary layout displaying the author's name, top book, and average rating.
+
     Args:
-        info (Dict[str, Any]): Dictionary containing 'author_name', 'top_work', and 'avg_rating'.
-    
+        info (Dict[str, Any]): Dictionary with keys 'author_name', 'top_work', and 'avg_rating'.
+
     Returns:
         html.Div: The HTML layout for the summary.
     """
@@ -130,11 +125,11 @@ def create_ratings_count_chart(rating_counts: Dict[str, int]) -> Dict[str, Any]:
 def build_dashboard_layout(author_info: Dict[str, Any], rating_counts: Dict[str, int]) -> html.Div:
     """
     Build and return the complete dashboard layout with summary and ratings count chart.
-    
+
     Args:
         author_info (Dict[str, Any]): Author's basic info.
-        rating_counts (Dict[str, int]): Ratings counts dictionary.
-    
+        rating_counts (Dict[str, int]): Ratings count dictionary.
+
     Returns:
         html.Div: The complete Dash layout.
     """
@@ -146,12 +141,7 @@ def build_dashboard_layout(author_info: Dict[str, Any], rating_counts: Dict[str,
             summary_layout,
             html.Div(
                 children=[dcc.Graph(id="ratings-count-chart", figure=chart_figure)],
-                style={
-                    "marginTop": "50px",
-                    "maxWidth": "800px",
-                    "marginLeft": "auto",
-                    "marginRight": "auto"
-                }
+                style={"marginTop": "50px", "maxWidth": "800px", "marginLeft": "auto", "marginRight": "auto"}
             )
         ]
     )
@@ -159,7 +149,7 @@ def build_dashboard_layout(author_info: Dict[str, Any], rating_counts: Dict[str,
 def run_dashboard(author_key: str, db_file: str) -> None:
     """
     Launch the Dash dashboard for the given author key.
-
+    
     Args:
         author_key (str): The OpenLibrary author key (e.g., "OL23919A").
         db_file (str): The SQLite database file path.
@@ -172,7 +162,6 @@ def run_dashboard(author_key: str, db_file: str) -> None:
     app.layout = build_dashboard_layout(author_info, rating_counts)
     
     logger.info("Launching dashboard server for author key: %s", author_key)
-    # Note: app.run is blocking; run with debug=True for easier development.
     app.run(debug=True)
 
 if __name__ == '__main__':

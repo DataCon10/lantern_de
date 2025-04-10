@@ -41,3 +41,21 @@ INSERT OR REPLACE INTO ratings (
     ratings_count_5
 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 """
+
+# Query to fetch the basic author info from the "authors" table.
+SELECT_AUTHOR_INFO: str = """
+SELECT name, top_work FROM authors WHERE author_id = ?
+"""
+
+# Query to fetch the average rating from the "ratings" table.
+SELECT_AUTHOR_RATING: str = """
+SELECT ratings_average FROM ratings WHERE author_id = ?
+"""
+
+# Query to fetch the individual rating counts from the "ratings" table.
+SELECT_RATING_COUNTS: str = """
+SELECT ratings_count_1, ratings_count_2, ratings_count_3, 
+       ratings_count_4, ratings_count_5 
+FROM ratings
+WHERE author_id = ?
+"""
