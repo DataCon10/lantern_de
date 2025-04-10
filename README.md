@@ -53,7 +53,44 @@
 - Docker (optional) if you prefer containerisation.
 
 ### Setup
-1. **Clone the Repository:**
+## How to Execute and Share the Project
+
+1. **Clone the Repository & Set Up Your Environment:**
+
+   - Clone the repository:
+     ```bash
+     git clone <repository_url>
+     cd your_project_root
+     ```
+
+   - Create and activate a virtual environment:
+     - **macOS/Linux:**
+       ```bash
+       python3 -m venv venv
+       source venv/bin/activate
+       ```
+     - **Windows:**
+       ```bash
+       python -m venv venv
+       venv\Scripts\activate
+       ```
+
+2. **Install Dependencies and the Application:**
+
+   Install the required packages and register the console script by running:
    ```bash
-   git clone <repository_url>
-   cd your_project_root
+   pip install -r requirements.txt
+   pip install -e .
+
+3. **Fetch and store data**
+```python -m myapp.cli run "J.K. Rowling"```
+
+4. **Launch interactive dashboard**
+```python -m myapp.cli dashboard --author-key OL23919A```
+    Open your browser and go to http://127.0.0.1:8050 to view the dashboard, which displays the author's profile and a ratings count chart.
+
+
+# Docker Setup (Not tested locally)
+docker build -t myapp:latest .
+docker run --rm myapp:latest run "J.K. Rowling"
+
