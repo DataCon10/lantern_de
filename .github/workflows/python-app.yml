@@ -2,7 +2,7 @@ name: Python Application CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ '**' ]
   pull_request:
     branches: [ main ]
 
@@ -23,12 +23,17 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
+        
+      - name: List directory structure
+        run: find . -type d -print | sort
 
-      - name: Install dependencies
+      - name: Install dependencies and package
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-
+          # Uninstall the package if it's already installed. The "|| true" ensures the step doesn't fail if the package isn't installed.
+          pip uninstall -y myapp || true
+          pip install -e .
+      
       - name: Run tests with pytest
-        run: |
-          pytest --maxfail=1 --disable-warnings -q
+        run: pytest --maxfail=1 --disable-warnings -q
