@@ -6,16 +6,14 @@ import os
 from pprint import pformat
 from dotenv import load_dotenv
 from myapp import author_api, db
+from myapp.logging_config import configure_logging
 
-# Load environment variables from the .env file located in the project root.
+# Load environment variables from the .env file in the project root.
 load_dotenv()
 
-logging.basicConfig(
-    level=os.environ.get("LOG_LEVEL", "INFO"),
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
-)
+# Configure logging using our centralized configuration.
+configure_logging()
 logger = logging.getLogger(__name__)
-
 
 def parse_args():
     """
@@ -44,7 +42,6 @@ def main():
             logger.error("Failed to connect to the database.")
             return
 
-        # Create tables, insert data, etc.
         database.create_tables()
         database.insert_author(author_data)
         database.insert_ratings(author_data)
@@ -52,9 +49,7 @@ def main():
 
     except Exception as e:
         logger.exception("An error occurred during database operations: %s", e)
-
     finally:
-        # Ensure the database connection is closed even if errors occur.
         if database:
             database.close()
 
