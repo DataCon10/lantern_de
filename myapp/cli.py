@@ -11,7 +11,7 @@ from myapp.logging_config import configure_logging
 # Load environment variables from the .env file in the project root.
 load_dotenv()
 
-# Configure logging using our centralized configuration.
+# Configure logging using centralised configuration.
 configure_logging()
 logger = logging.getLogger(__name__)
 
