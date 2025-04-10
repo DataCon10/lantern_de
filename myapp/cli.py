@@ -3,7 +3,7 @@
 import argparse
 import logging
 import os
-from pprint import pprint
+from pprint import pformat
 from dotenv import load_dotenv
 from myapp import author_api, db
 
@@ -15,6 +15,7 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
 )
 logger = logging.getLogger(__name__)
+
 
 def parse_args():
     """
@@ -33,7 +34,7 @@ def main():
     # Retrieve the author profile from the API.
     author_key, author_data = author_api.search_author(args.author)
     logger.info("Found author key: %s", author_key)
-    logger.debug("Author JSON profile: %s", author_data)
+    logger.debug("Author JSON profile: \n%s", pformat(author_data))
 
     # Create an instance of the Database class.
     database = db.Database()
